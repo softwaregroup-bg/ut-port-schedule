@@ -26,7 +26,7 @@
                     cronTime: jobConfig.pattern,
                     onTick:function() {
                         this.port.jobsList[this.jobName].lastRun = new Date();
-                        this.port.incoming.write({_opcode: this.jobName, _MessageID: this.jobName, payload: this.port.jobsList[this.jobName]})
+                        this.port.incoming.write({$$:{opcode: this.jobName, mtid: 'request'}, messageId: this.jobName, payload: this.port.jobsList[this.jobName]})
                     },
                     start: true,
                     timeZone: undefined,
@@ -35,12 +35,12 @@
                 this.jobs[jobName] = job;
                 if (CheckForImmediateRun(jobConfig.lastRun, job)) {
                     jobConfig.lastRun = new Date();
-                    this.incoming.write({_opcode: jobName, _MessageID: jobName, payload: jobConfig})
+                    this.incoming.write({$$:{opcode: jobName, mtid: 'request'}, messageID: jobName, payload: jobConfig})
                 }
             }
         }
 
-        this.log.info && this.log.info({_opcode:'Schedule',msg:'All jobs started'});
+        this.log.info && this.log.info({opcode:'Schedule',msg:'All jobs started'});
     }
 
     util.inherits(Schedule, Port);

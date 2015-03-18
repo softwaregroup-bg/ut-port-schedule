@@ -2,6 +2,7 @@
   "name": "ut-port-schedule",
   "version": "5.0.0",
   "dependencies": {
+    "cron": "~1.0.8",
     "ut-bus": "~5.0.0"
   },
   "publishConfig": {

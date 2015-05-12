@@ -4,6 +4,7 @@
     var Port = require('ut-bus/port');
     var util = require('util');
     var cron = require('cron');
+    var through2 = require('through2');
 
     function Schedule() {
         Port.call(this);
@@ -15,6 +16,7 @@
         };
         this.jobsList = {};
         this.jobs = {};
+        this.incoming = {};
     }
 
     function InitJobs() {
@@ -26,7 +28,7 @@
                     cronTime: jobConfig.pattern,
                     onTick:function() {
                         this.port.jobsList[this.jobName].lastRun = new Date();
-                        this.port.incoming.write({$$:{opcode: this.jobName, mtid: 'request'}, messageId: this.jobName, payload: this.port.jobsList[this.jobName]})
+                        this.port.incoming.write({$$:{opcode: this.jobName, mtid: 'notification'}, messageId: this.jobName, payload: this.port.jobsList[this.jobName]})
                     },
                     start: true,
                     timeZone: undefined,
@@ -35,7 +37,7 @@
                 this.jobs[jobName] = job;
                 if (CheckForImmediateRun(jobConfig.lastRun, job)) {
                     jobConfig.lastRun = new Date();
-                    this.incoming.write({$$:{opcode: jobName, mtid: 'request'}, messageID: jobName, payload: jobConfig})
+                    this.incoming.write({$$:{opcode: jobName, mtid: 'notification'}, messageID: jobName, payload: jobConfig})
                 }
             }
         }
@@ -51,16 +53,20 @@
 
     Schedule.prototype.start = function start() {
         Port.prototype.start.apply(this, arguments);
+        this.incoming = through2.obj(function(chunk, enc, callback) {
+            this.push(chunk);
+            callback();
+        });
+        this.pipe(this.incoming, {trace:0, callbacks:{}});
 
         this.loadJobs();
         InitJobs.call(this);
-
     };
 
-    Schedule.prototype.loadJobs = function loadJobs(jobList) {
+    Schedule.prototype.loadJobs = function loadJobs() {
         // TODO: load from file/db/args? ....
-        if (jobList) {
-            this.jobsList = jobList;
+        if (this.config.jobsList) {
+            this.jobsList = this.config.jobsList;
         }else {
             this.jobsList = {
                 "job1": {

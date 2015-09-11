@@ -3,7 +3,11 @@
   "version": "5.0.0",
   "dependencies": {
     "cron": "~1.0.8",
+    "through2": "~1.1.1",
     "ut-bus": "~5.0.0"
+  },
+  "devDependencies": {
+    "wire": "~0.10.10"
   },
   "publishConfig": {
     "registry": "http://npm.softwaregroup-bg.com:5001"

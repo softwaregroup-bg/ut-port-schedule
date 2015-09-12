@@ -2,7 +2,11 @@
   "name": "ut-port-schedule",
   "version": "5.2.0",
   "dependencies": {
-    "cron": "~1.0.8"
+    "cron": "~1.0.8",
+    "through2": "~1.1.1"
+  },
+  "devDependencies": {
+    "wire": "~0.10.10"
   },
   "peerDependencies":{
     "ut-bus": "~5.2.0"

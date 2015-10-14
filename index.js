@@ -61,10 +61,10 @@ Schedule.prototype.start = function start() {
 };
 
 Schedule.prototype.loadJobs = function loadJobs() {
-    // TODO: load from file/db/args? ....
     if (this.config.jobsList) {
         this.jobsList = this.config.jobsList;
-    }else {
+    } else {
+        // TODO: load from file/db/args? ....
         this.jobsList = {
             "job1": {
                 "opcode": "job1",

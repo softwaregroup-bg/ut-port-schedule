@@ -4,6 +4,10 @@ var cron = require('cron');
 var through2 = require('through2');
 var push;
 var jobs = {};
+var extLoad;
+var ranNotify;
+var extLoadInterval = 60000 * 60;
+
 function CheckForImmediateRun(job) {
     if (!job.lastRun || !(job.lastRun instanceof Date)) {
         return false;
@@ -102,7 +106,41 @@ UtCron.prototype.start = function start() {
     if (this.config.jobsList && (Object.keys(this.config.jobsList).length > 0)) {
         this.addJobs(this.config.jobsList);
     }
+
+    if (this.config.extLoad && this.config.extLoad.from && this.config.extLoad.every) {
+        extLoad = this.bus.importMethod(this.config.extLoad.from);
+        extLoadInterval = parseInt(this.config.extLoad.every.slice(0, -1));
+        switch(this.config.extLoad.every.slice(-1)) {
+            case 'h':
+                extLoadInterval = extLoadInterval * 60 * 60;
+            break;
+            case 'm':
+                extLoadInterval = extLoadInterval * 60;
+            break;
+        }
+        extLoadInterval = extLoadInterval * 1000;
+
+        setInterval(this.extLoad.bind(this), extLoadInterval);
+    }
+    if (this.config.ran && this.config.ran.notify) {
+        ranNotify = this.bus.importMethod(this.config.ran.notify);
+    }
 };
+
+UtCron.prototype.extLoad = function(jobs) {
+    extLoad({})
+    .then(function(r) {
+        if (r.jobsList) {
+            r = r.jobsList;
+            var i = 0;
+            while(r[i]) {
+                this.updateJob(r[i].name, r[i]);
+                i = i + 1;
+            }
+        }
+    }.bind(this))
+    .catch(function(e) {});
+}
 
 UtCron.prototype.addJobs = function(jobs) {
     var keys = Object.keys(this.config.jobsList);
@@ -114,13 +152,18 @@ UtCron.prototype.addJobs = function(jobs) {
 
 UtCron.prototype.addJob = function(name, job) {
     if (!jobs[name]) {
-        this.log.info && this.log.info({opcode:'Schedule',msg:`Add Job ${name}`});
+        this.log.info && this.log.info({opcode:'Schedule',msg:`Add Job ${name}`,job: job});
         jobs[name] = new cron.CronJob({
             cronTime: job.pattern,
             onTick: function() {
                 job.lastRun = jobs[name].lastRun;
                 jobs[name].lastRun = new Date();
-                push.write({$$:{opcode: name, mtid: 'notification'}, messageId: name, payload: job})
+                push.write({$$:{opcode: name, mtid: 'notification'}, messageId: name, payload: job});
+                if (ranNotify) {
+                    ranNotify(job)
+                    .then(function() {})
+                    .catch(function() {});
+                }
             },
             start: true,
             timeZone: undefined,
@@ -138,7 +181,7 @@ UtCron.prototype.updateJob = function(name, job) {
     if (jobs[name]) {
         this.log.info && this.log.info({opcode:'Schedule',msg:`Remove Job ${name}`});
         jobs[name].stop();
-        job.lastRun = jobs[name].lastRun;
+        job.lastRun = jobs[name].lastRun || job.lastRun;
         delete jobs[name];
     }
     this.addJob(name, job);

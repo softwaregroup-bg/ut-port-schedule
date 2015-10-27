@@ -5,7 +5,7 @@ var through2 = require('through2');
 var push;
 var jobs = {};
 var extLoad;
-var ranNotify;
+var runNotify;
 var extLoadInterval = 60000 * 60;
 
 function CheckForImmediateRun(job) {
@@ -122,8 +122,8 @@ UtCron.prototype.start = function start() {
 
         setInterval(this.extLoad.bind(this), extLoadInterval);
     }
-    if (this.config.ran && this.config.ran.notify) {
-        ranNotify = this.bus.importMethod(this.config.ran.notify);
+    if (this.config.run && this.config.run.notify) {
+        runNotify = this.bus.importMethod(this.config.run.notify);
     }
 };
 
@@ -158,9 +158,9 @@ UtCron.prototype.addJob = function(name, job) {
             onTick: function() {
                 job.lastRun = jobs[name].lastRun;
                 jobs[name].lastRun = new Date();
-                push.write({$$:{opcode: name, mtid: 'notification'}, messageId: name, payload: job});
-                if (ranNotify) {
-                    ranNotify(job)
+                push.write([job, {opcode: name, mtid: 'notification'}]);
+                if (runNotify) {
+                    runNotify(job)
                     .then(function() {})
                     .catch(function() {});
                 }
@@ -170,7 +170,7 @@ UtCron.prototype.addJob = function(name, job) {
             context: undefined
         });
         if (CheckForImmediateRun(job)) {
-            push.write({$$:{opcode: name, mtid: 'notification'}, messageId: name, payload: job})
+            push.write([job, {opcode: name, mtid: 'notification'}]);
         }
     } else {
         this.log.info && this.log.info({opcode:'Schedule',msg:`Cannot Add Job ${name}, allready exists, use updateJob`});

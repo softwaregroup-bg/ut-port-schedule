@@ -122,8 +122,8 @@ UtCron.prototype.start = function start() {
 
         setInterval(this.extLoad.bind(this), extLoadInterval);
     }
-    if (this.config.ran && this.config.ran.notify) {
-        ranNotify = this.bus.importMethod(this.config.ran.notify);
+    if (this.config.run && this.config.run.notify) {
+        ranNotify = this.bus.importMethod(this.config.run.notify);
     }
 };
 

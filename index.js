@@ -156,8 +156,8 @@ UtCron.prototype.addJob = function(name, job) {
         jobs[name] = new cron.CronJob({
             cronTime: job.pattern,
             onTick: function() {
-                job.lastRun = jobs[name].lastRun;
                 jobs[name].lastRun = new Date();
+                job.lastRun = jobs[name].lastRun;
                 push.write({$$:{opcode: name, mtid: 'notification'}, messageId: name, payload: job});
                 if (ranNotify) {
                     ranNotify(job)

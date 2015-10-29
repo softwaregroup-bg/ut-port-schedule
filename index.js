@@ -160,7 +160,7 @@ UtCron.prototype.addJob = function(name, job) {
                 job.lastRun = jobs[name].lastRun;
                 push.write([job, {opcode: name, mtid: 'notification'}]);
 
-                if (ranNotify) {
+                if (runNotify) {
                     runNotify(job)
                     .then(function() {})
                     .catch(function() {});

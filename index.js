@@ -156,10 +156,11 @@ UtCron.prototype.addJob = function(name, job) {
         jobs[name] = new cron.CronJob({
             cronTime: job.pattern,
             onTick: function() {
-                job.lastRun = jobs[name].lastRun;
                 jobs[name].lastRun = new Date();
+                job.lastRun = jobs[name].lastRun;
                 push.write([job, {opcode: name, mtid: 'notification'}]);
-                if (runNotify) {
+
+                if (ranNotify) {
                     runNotify(job)
                     .then(function() {})
                     .catch(function() {});

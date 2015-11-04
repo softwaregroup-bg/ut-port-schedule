@@ -14,7 +14,7 @@
   "publishConfig": {
     "registry": "http://npm.softwaregroup-bg.com:5001"
   },
-  "description": "UT port schedule module",
+  "description": "UT port schedule module.",
   "repository": {
     "type": "git",
     "url": "git@git.softwaregroup-bg.com:ut5/ut-port-schedule.git"

@@ -18,7 +18,7 @@ function CheckForImmediateRun(job) {
     var lastRunMonth = (job.lastRun.getMonth()).toString();
     var nlastRunYear = job.lastRun.getFullYear();
     var lastRunYear = nlastRunYear.toString();
-    var lastRunYearMonth = parseInt(lastRunYear + (lastRunMonth.length == 1 ? ('0' + lastRunMonth) : lastRunMonth));
+    var lastRunYearMonth = parseInt(lastRunYear + (lastRunMonth.length === 1 ? ('0' + lastRunMonth) : lastRunMonth), 10);
     var cronTime = job.cronTime;
     var cMinute = cronTime.minute;
     var cHour = cronTime.hour;
@@ -27,9 +27,9 @@ function CheckForImmediateRun(job) {
     var cWeekDays = cronTime.dayOfWeek;
 
     var eMonth = null;
-    for (m in cMonth) {
+    for (var m in cMonth) {
         var mStr = m.toString();
-        var cYearMonth = parseInt(lastRunYear + (mStr.length == 1 ? ('0' + mStr) : mStr));
+        var cYearMonth = parseInt(lastRunYear + (mStr.length === 1 ? ('0' + mStr) : mStr), 10);
         if (cYearMonth >= lastRunYearMonth) {
             eMonth = m;
             break;
@@ -37,7 +37,7 @@ function CheckForImmediateRun(job) {
         eMonth = m;
     }
     var eDay = null;
-    for (d in cDay) {
+    for (var d in cDay) {
         if (d >= lastRunDay) {
             eDay = d;
             break;
@@ -45,7 +45,7 @@ function CheckForImmediateRun(job) {
         eDay = d;
     }
     var eHour = null;
-    for (h in cHour) {
+    for (var h in cHour) {
         if (h >= lastRunHour) {
             eHour = h;
             break;
@@ -53,7 +53,7 @@ function CheckForImmediateRun(job) {
         eHour = h;
     }
     var eMinute = null;
-    for (n in cMinute) {
+    for (var n in cMinute) {
         if (n >= lastRunMin) {
             eMinute = n;
             break;
@@ -101,7 +101,7 @@ UtCron.prototype.start = function start() {
         this.push(chunk);
         callback();
     });
-    this.pipe(push, {trace:0, callbacks:{}});
+    this.pipe(push, {trace: 0, callbacks: {}});
 
     if (this.config.jobsList && (Object.keys(this.config.jobsList).length > 0)) {
         this.addJobs(this.config.jobsList);
@@ -109,14 +109,14 @@ UtCron.prototype.start = function start() {
 
     if (this.config.extLoad && this.config.extLoad.from && this.config.extLoad.every) {
         extLoad = this.bus.importMethod(this.config.extLoad.from);
-        extLoadInterval = parseInt(this.config.extLoad.every.slice(0, -1));
-        switch(this.config.extLoad.every.slice(-1)) {
+        extLoadInterval = parseInt(this.config.extLoad.every.slice(0, -1), 10);
+        switch (this.config.extLoad.every.slice(-1)) {
             case 'h':
                 extLoadInterval = extLoadInterval * 60 * 60;
-            break;
+                break;
             case 'm':
                 extLoadInterval = extLoadInterval * 60;
-            break;
+                break;
         }
         extLoadInterval = extLoadInterval * 1000;
 
@@ -133,26 +133,26 @@ UtCron.prototype.extLoad = function(jobs) {
         if (r.jobsList) {
             r = r.jobsList;
             var i = 0;
-            while(r[i]) {
+            while (r[i]) {
                 this.updateJob(r[i].name, r[i]);
                 i = i + 1;
             }
         }
     }.bind(this))
     .catch(function(e) {});
-}
+};
 
 UtCron.prototype.addJobs = function(jobs) {
     var keys = Object.keys(this.config.jobsList);
-    for(var i = 0,l = keys.length;i < l; i++) {
-        this.addJob(keys[i], jobs[keys[i]])
+    for (var i = 0, l = keys.length; i < l; i++) {
+        this.addJob(keys[i], jobs[keys[i]]);
     }
-    this.log.info && this.log.info({opcode:'Schedule',msg:'All jobs started'});
-}
+    this.log.info && this.log.info({opcode: 'Schedule', msg: 'All jobs started'});
+};
 
 UtCron.prototype.addJob = function(name, job) {
     if (!jobs[name]) {
-        this.log.info && this.log.info({opcode:'Schedule',msg:`Add Job ${name}`,job: job});
+        this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
         jobs[name] = new cron.CronJob({
             cronTime: job.pattern,
             onTick: function() {
@@ -174,18 +174,18 @@ UtCron.prototype.addJob = function(name, job) {
             push.write([job, {opcode: name, mtid: 'notification'}]);
         }
     } else {
-        this.log.info && this.log.info({opcode:'Schedule',msg:`Cannot Add Job ${name}, allready exists, use updateJob`});
+        this.log.info && this.log.info({opcode: 'Schedule', msg: `Cannot Add Job ${name}, allready exists, use updateJob`});
     }
-}
+};
 
 UtCron.prototype.updateJob = function(name, job) {
     if (jobs[name]) {
-        this.log.info && this.log.info({opcode:'Schedule',msg:`Remove Job ${name}`});
+        this.log.info && this.log.info({opcode: 'Schedule', msg: `Remove Job ${name}`});
         jobs[name].stop();
         job.lastRun = jobs[name].lastRun || job.lastRun;
         delete jobs[name];
     }
     this.addJob(name, job);
-}
+};
 
 module.exports = UtCron;

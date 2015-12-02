@@ -6,6 +6,7 @@
     "through2": "~1.1.1"
   },
   "devDependencies": {
+    "ut-tools": "~0.5.1",
     "wire": "~0.10.10"
   },
   "peerDependencies": {
@@ -15,6 +16,10 @@
     "registry": "http://npm.softwaregroup-bg.com:5001"
   },
   "description": "UT port schedule module.",
+  "scripts": {
+    "test": "npm run lint",
+    "lint": "ut-lint ."
+  },
   "repository": {
     "type": "git",
     "url": "git@git.softwaregroup-bg.com:ut5/ut-port-schedule.git"

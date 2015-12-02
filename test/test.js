@@ -2,7 +2,7 @@ require('repl').start({useGlobal: true});
 
 var wire = require('wire');
 
-m = wire({
+wire({
     bunyan: {
         create: {
             module: 'ut-log',

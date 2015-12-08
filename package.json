@@ -6,7 +6,7 @@
     "through2": "~1.1.1"
   },
   "devDependencies": {
-    "ut-tools": "~0.5.1",
+    "ut-tools": "~1.0.0",
     "wire": "~0.10.10"
   },
   "peerDependencies": {
@@ -17,8 +17,11 @@
   },
   "description": "UT port schedule module.",
   "scripts": {
-    "test": "npm run lint",
-    "lint": "ut-lint ."
+    "lint": "ut-lint .",
+    "pre-commit": "npm run lint",
+    "pre-release": "ut-pre-release",
+    "release": "ut-release",
+    "post-release": "ut-post-release"
   },
   "repository": {
     "type": "git",

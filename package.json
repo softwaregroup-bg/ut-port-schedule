@@ -1,6 +1,6 @@
 {
   "name": "ut-port-schedule",
-  "version": "5.3.4",
+  "version": "5.3.5",
   "dependencies": {
     "cron": "~1.0.8",
     "through2": "~2.0.0"

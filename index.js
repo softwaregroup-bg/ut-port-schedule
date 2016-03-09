@@ -173,6 +173,7 @@ UtCron.prototype.addJob = function(name, job) {
             timeZone: undefined,
             context: undefined
         });
+        this.jobs[name].updatedAt = job.updatedAt;
         if (CheckForImmediateRun(job)) {
             this.comunicator.write([job, {opcode: name, mtid: 'notification'}]);
         }
@@ -197,7 +198,7 @@ UtCron.prototype.removeJob = function(name) {
 
 UtCron.prototype.cleanupExpiredJobs = function(updateTime) {
     Object.keys(this.jobs).map(function(key) {
-        if (key.updatedAt !== updateTime) {
+        if (this.jobs[key].updatedAt !== updateTime) {
             this.removeJob(key);
         }
     }.bind(this));

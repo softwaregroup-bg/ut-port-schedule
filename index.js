@@ -198,9 +198,9 @@ UtCron.prototype.removeJob = function(name) {
 UtCron.prototype.cleanupExpiredJobs = function(updateTime) {
     Object.keys(this.jobs).map(function(key) {
         if (key.updatedAt !== updateTime) {
-            UtCron.removeJob(key);
+            this.removeJob(key);
         }
-    });
+    }.bind(this));
 };
 
 module.exports = UtCron;

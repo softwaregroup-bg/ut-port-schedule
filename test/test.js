@@ -1,36 +1,12 @@
-require('repl').start({useGlobal: true});
-
-var wire = require('wire');
-
-wire({
-    bunyan: {
-        create: {
-            module: 'ut-log',
-            args: {
-                type: 'bunyan',
-                name: 'bunyan_test',
-                streams: [
-                    {
-                        level: 'trace',
-                        stream: 'process.stdout'
-                    }
-                ]
-            }
-        }
-    },
-    schedule: {
-        create: 'ut-port-schedule',
-        init: 'init',
-        properties: {
-            config: {
-                id: 'schedule',
-                logLevel: 'debug'
-            },
-            log: {$ref: 'bunyan'}
-        }
+var assign = require('lodash/object/assign');
+var LDAP = require('../index');
+var ldap = assign(new LDAP(), {
+    config: {
+        id: 'ldap',
+        logLevel: 'debug',
+        url: 'ldap://172.16.30.1:61008',
+        listen: false
     }
-}, {require: require}).then(function contextLoaded(context) {
-    context.schedule.start();
-
-    context.schedule.restartJobs();
-}).done();
+});
+ldap.init();
+// ldap.restartJobs();

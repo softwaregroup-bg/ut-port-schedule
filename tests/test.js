@@ -1,6 +1,6 @@
 var assign = require('lodash/object/assign');
-var LDAP = require('../index');
-var ldap = assign(new LDAP(), {
+var Schedule = require('../index');
+var schedule = assign(new Schedule(), {
     config: {
         id: 'ldap',
         logLevel: 'debug',
@@ -8,5 +8,5 @@ var ldap = assign(new LDAP(), {
         listen: false
     }
 });
-ldap.init();
-// ldap.restartJobs();
+schedule.init();
+// schedule.restartJobs();

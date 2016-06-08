@@ -1,4 +1,4 @@
-var assign = require('lodash/object/assign');
+var assign = require('lodash.assign');
 var Schedule = require('../index');
 var schedule = assign(new Schedule(), {
     config: {

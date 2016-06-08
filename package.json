@@ -3,7 +3,7 @@
   "version": "5.3.9",
   "dependencies": {
     "cron": "1.0.8",
-    "lodash": "3.10.1",
+    "lodash.assign": "4.0.9",
     "through2": "2.0.1"
   },
   "devDependencies": {

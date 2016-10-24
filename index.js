@@ -148,7 +148,7 @@ UtCron.prototype.extLoad = function(jobs) {
 UtCron.prototype.addJobs = function(jobs) {
     var keys = Object.keys(this.config.jobsList);
     for (var i = 0, l = keys.length; i < l; i++) {
-        this.addJob(keys[i], this.jobs[keys[i]]);
+        this.addJob(keys[i], jobs[keys[i]]);
     }
     this.log.info && this.log.info({opcode: 'Schedule', msg: 'All jobs started'});
 };

@@ -1,3 +1,13 @@
+<a name="5.4.5"></a>
+## [5.4.5](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v5.4.4...v5.4.5) (2016-10-24)
+
+
+### Bug Fixes
+
+* fix bad reference to this ([e8c59d5](https://github.com/softwaregroup-bg/ut-port-schedule/commit/e8c59d5))
+
+
+
 <a name="5.4.4"></a>
 ## [5.4.4](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v5.4.3...v5.4.4) (2016-09-21)
 

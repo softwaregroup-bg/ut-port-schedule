@@ -1,3 +1,13 @@
+<a name="5.5.0"></a>
+# [5.5.0](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v5.4.7...v5.5.0) (2016-12-23)
+
+
+### Features
+
+* update dependencies ([4a20d9e](https://github.com/softwaregroup-bg/ut-port-schedule/commit/4a20d9e))
+
+
+
 <a name="5.4.7"></a>
 ## [5.4.7](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v5.4.6...v5.4.7) (2016-11-02)
 

@@ -1,3 +1,13 @@
+<a name="5.5.1"></a>
+## [5.5.1](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v5.5.0...v5.5.1) (2017-03-08)
+
+
+### Bug Fixes
+
+* dependencies ([de0b9df](https://github.com/softwaregroup-bg/ut-port-schedule/commit/de0b9df))
+
+
+
 <a name="5.5.0"></a>
 # [5.5.0](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v5.4.7...v5.5.0) (2016-12-23)
 

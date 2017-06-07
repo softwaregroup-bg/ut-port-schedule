@@ -156,22 +156,25 @@ UtCron.prototype.addJobs = function(jobs) {
 UtCron.prototype.addJob = function(name, job) {
     if (!this.jobs[name]) {
         this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
-        this.jobs[name] = new cron.CronJob({
-            cronTime: job.pattern,
-            onTick: function() {
-                this.jobs[name].lastRun = (new Date()).toISOString();
-                job.lastRun = this.jobs[name].lastRun;
-                this.comunicator.write([job, {opcode: name, mtid: 'notification'}]);
+        job.pattern = job.pattern.constructor === Array ? job.pattern : new Array(job.pattern);
+        job.pattern.forEach((pattern) => {
+            this.jobs[name] = new cron.CronJob({
+                cronTime: pattern,
+                onTick: function() {
+                    this.jobs[name].lastRun = (new Date()).toISOString();
+                    job.lastRun = this.jobs[name].lastRun;
+                    this.comunicator.write([job, {opcode: name, mtid: 'notification'}]);
 
-                if (runNotify) {
-                    runNotify(job)
-                    .then(function() {})
-                    .catch(function() {});
-                }
-            }.bind(this),
-            start: true,
-            timeZone: undefined,
-            context: undefined
+                    if (runNotify) {
+                        runNotify(job)
+                        .then(function() {})
+                        .catch(function() {});
+                    }
+                }.bind(this),
+                start: true,
+                timeZone: undefined,
+                context: undefined
+            });
         });
         this.jobs[name].updatedAt = job.updatedAt;
         if (CheckForImmediateRun(job)) {

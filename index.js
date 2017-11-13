@@ -78,7 +78,7 @@ module.exports = function({parent}) {
         parent && parent.apply(this, arguments);
         this.config = merge({
             id: null,
-            logLevel: '',
+            logLevel: 'info',
             jobsList: {},
             type: 'schedule',
             listen: false

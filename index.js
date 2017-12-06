@@ -1,57 +1,54 @@
-var Port = require('ut-bus/port');
-var util = require('util');
-var cron = require('cron');
-var through2 = require('through2');
-var extLoad;
-var runNotify;
-var extLoadInterval = 60000 * 60;
+'use strict';
+const merge = require('lodash.merge');
+const util = require('util');
+const cron = require('cron');
 
 function CheckForImmediateRun(job) {
     if (!job.lastRun || !(job.lastRun instanceof Date)) {
         return false;
     }
-    var lastRunMin = job.lastRun.getMinutes();
-    var lastRunHour = job.lastRun.getHours();
-    var lastRunDay = job.lastRun.getDate();
-    var lastRunMonth = (job.lastRun.getMonth()).toString();
-    var nlastRunYear = job.lastRun.getFullYear();
-    var lastRunYear = nlastRunYear.toString();
-    var lastRunYearMonth = parseInt(lastRunYear + (lastRunMonth.length === 1 ? ('0' + lastRunMonth) : lastRunMonth), 10);
-    var cronTime = job.cronTime;
-    var cMinute = cronTime.minute;
-    var cHour = cronTime.hour;
-    var cDay = cronTime.dayOfMonth;
-    var cMonth = cronTime.month;
-    var cWeekDays = cronTime.dayOfWeek;
+    let lastRunMin = job.lastRun.getMinutes();
+    let lastRunHour = job.lastRun.getHours();
+    let lastRunDay = job.lastRun.getDate();
+    let lastRunMonth = (job.lastRun.getMonth()).toString();
+    let nlastRunYear = job.lastRun.getFullYear();
+    let lastRunYear = nlastRunYear.toString();
+    let lastRunYearMonth = parseInt(lastRunYear + (lastRunMonth.length === 1 ? ('0' + lastRunMonth) : lastRunMonth), 10);
+    let cronTime = job.cronTime;
+    let cMinute = cronTime.minute;
+    let cHour = cronTime.hour;
+    let cDay = cronTime.dayOfMonth;
+    let cMonth = cronTime.month;
+    let cWeekDays = cronTime.dayOfWeek;
 
-    var eMonth = null;
-    for (var m in cMonth) {
-        var mStr = m.toString();
-        var cYearMonth = parseInt(lastRunYear + (mStr.length === 1 ? ('0' + mStr) : mStr), 10);
+    let eMonth = null;
+    for (let m in cMonth) {
+        let mStr = m.toString();
+        let cYearMonth = parseInt(lastRunYear + (mStr.length === 1 ? ('0' + mStr) : mStr), 10);
         if (cYearMonth >= lastRunYearMonth) {
             eMonth = m;
             break;
         }
         eMonth = m;
     }
-    var eDay = null;
-    for (var d in cDay) {
+    let eDay = null;
+    for (let d in cDay) {
         if (d >= lastRunDay) {
             eDay = d;
             break;
         }
         eDay = d;
     }
-    var eHour = null;
-    for (var h in cHour) {
+    let eHour = null;
+    for (let h in cHour) {
         if (h >= lastRunHour) {
             eHour = h;
             break;
         }
         eHour = h;
     }
-    var eMinute = null;
-    for (var n in cMinute) {
+    let eMinute = null;
+    for (let n in cMinute) {
         if (n >= lastRunMin) {
             eMinute = n;
             break;
@@ -59,149 +56,143 @@ function CheckForImmediateRun(job) {
         eMinute = n;
     }
 
-    var nextDateTime = new Date(nlastRunYear, eMonth, eDay, eHour, eMinute, 0, 0);
+    let nextDateTime = new Date(nlastRunYear, eMonth, eDay, eHour, eMinute, 0, 0);
 
-    for (var w = 0; w <= 6; w++) {
-        var nextWDay = nextDateTime.getDay();
+    for (let w = 0; w <= 6; w++) {
+        let nextWDay = nextDateTime.getDay();
         if (nextWDay in cWeekDays) {
             break;
         }
         nextDateTime.setDate(nextDateTime.getDate() + 1);
     }
 
-    var currD = new Date();
-    var nextTime = Math.floor(nextDateTime.getTime() / 1000);
-    var currTime = Math.floor(currD.getTime() / 1000);
+    let currD = new Date();
+    let nextTime = Math.floor(nextDateTime.getTime() / 1000);
+    let currTime = Math.floor(currD.getTime() / 1000);
 
     return (currTime > nextTime);
 }
 
-function UtCron() {
-    Port.call(this);
-    this.config = {
-        id: null,
-        logLevel: '',
-        jobsList: {},
-        type: 'schedule',
-        listen: false
-    };
-}
-
-util.inherits(UtCron, Port);
-UtCron.prototype.jobs = {};
-UtCron.prototype.comunicator;
-
-UtCron.prototype.init = function init() {
-    Port.prototype.init.apply(this, arguments);
-};
-
-UtCron.prototype.start = function start() {
-    Port.prototype.start.apply(this, arguments);
-    this.comunicator = through2.obj(function(chunk, enc, callback) {
-        this.push(chunk);
-        callback();
-    });
-    this.pipe(this.comunicator, {trace: 0, callbacks: {}});
-
-    if (this.config.jobsList && (Object.keys(this.config.jobsList).length > 0)) {
-        this.addJobs(this.config.jobsList);
+module.exports = function({parent}) {
+    function SchedulePort({config}) {
+        parent && parent.apply(this, arguments);
+        this.config = merge({
+            id: null,
+            logLevel: 'info',
+            jobsList: {},
+            type: 'schedule',
+            listen: false
+        }, config);
     }
 
-    if (this.config.extLoad && this.config.extLoad.from && this.config.extLoad.every) {
-        extLoad = this.bus.importMethod(this.config.extLoad.from);
-        extLoadInterval = parseInt(this.config.extLoad.every.slice(0, -1), 10);
-        switch (this.config.extLoad.every.slice(-1)) {
-            case 'h':
-                extLoadInterval = extLoadInterval * 60 * 60;
-                break;
-            case 'm':
-                extLoadInterval = extLoadInterval * 60;
-                break;
+    if (parent) {
+        util.inherits(SchedulePort, parent);
+    }
+
+    SchedulePort.prototype.jobs = {};
+
+    SchedulePort.prototype.start = function start() {
+        parent && parent.prototype.start.apply(this, arguments);
+        this.context = {requests: {}};
+        this.stream = this.pull(false, this.context);
+
+        if (this.config.jobsList && (Object.keys(this.config.jobsList).length > 0)) {
+            this.addJobs(this.config.jobsList);
         }
-        extLoadInterval = extLoadInterval * 1000;
 
-        setInterval(this.extLoad.bind(this), extLoadInterval);
-    }
-    if (this.config.run && this.config.run.notify) {
-        runNotify = this.bus.importMethod(this.config.run.notify);
-    }
-};
-
-UtCron.prototype.extLoad = function(jobs) {
-    extLoad({})
-    .then(function(r) {
-        var updateTime = Date.now();
-        if (r.jobsList) {
-            r = r.jobsList;
-            var i = 0;
-            while (r[i]) {
-                r[i].updatedAt = updateTime;
-                this.updateJob(r[i].name, r[i]);
-                i = i + 1;
+        if (this.config.extLoad && this.config.extLoad.from && this.config.extLoad.every) {
+            this._load = this.bus.importMethod(this.config.extLoad.from);
+            let extLoadInterval = parseInt(this.config.extLoad.every.slice(0, -1), 10);
+            switch (this.config.extLoad.every.slice(-1)) {
+                case 'h':
+                    extLoadInterval = extLoadInterval * 60 * 60;
+                    break;
+                case 'm':
+                    extLoadInterval = extLoadInterval * 60;
+                    break;
             }
+            extLoadInterval = extLoadInterval * 1000;
+
+            setInterval(this.extLoad.bind(this), extLoadInterval);
         }
-        this.cleanupExpiredJobs(updateTime);
-    }.bind(this))
-    .catch(function(e) {});
-};
+        if (this.config.run && this.config.run.notify) {
+            this._notify = this.bus.importMethod(this.config.run.notify);
+        }
+    };
 
-UtCron.prototype.addJobs = function(jobs) {
-    var keys = Object.keys(this.config.jobsList);
-    for (var i = 0, l = keys.length; i < l; i++) {
-        this.addJob(keys[i], jobs[keys[i]]);
-    }
-    this.log.info && this.log.info({opcode: 'Schedule', msg: 'All jobs started'});
-};
-
-UtCron.prototype.addJob = function(name, job) {
-    if (!this.jobs[name]) {
-        this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
-        this.jobs[name] = new cron.CronJob({
-            cronTime: job.pattern,
-            onTick: function() {
-                this.jobs[name].lastRun = (new Date()).toISOString();
-                job.lastRun = this.jobs[name].lastRun;
-                this.comunicator.write([job, {opcode: name, mtid: 'notification'}]);
-
-                if (runNotify) {
-                    runNotify(job)
-                    .then(function() {})
-                    .catch(function() {});
+    SchedulePort.prototype.extLoad = function(jobs) {
+        this._load({}).then(function(r) {
+            let updateTime = Date.now();
+            if (r.jobsList) {
+                r = r.jobsList;
+                let i = 0;
+                while (r[i]) {
+                    r[i].updatedAt = updateTime;
+                    this.updateJob(r[i].name, r[i]);
+                    i = i + 1;
                 }
-            }.bind(this),
-            start: true,
-            timeZone: undefined,
-            context: undefined
-        });
-        this.jobs[name].updatedAt = job.updatedAt;
-        if (CheckForImmediateRun(job)) {
-            this.comunicator.write([job, {opcode: name, mtid: 'notification'}]);
+            }
+            this.cleanupExpiredJobs(updateTime);
+        }.bind(this))
+        .catch(function(e) {});
+    };
+
+    SchedulePort.prototype.addJobs = function(jobs) {
+        let keys = Object.keys(this.config.jobsList);
+        for (let i = 0, l = keys.length; i < l; i++) {
+            this.addJob(keys[i], jobs[keys[i]]);
         }
-    } else {
-        this.log.info && this.log.info({opcode: 'Schedule', msg: `Cannot Add Job ${name}, allready exists, use updateJob`});
-    }
-};
+        this.log.info && this.log.info({opcode: 'Schedule', msg: 'All jobs started'});
+    };
 
-UtCron.prototype.updateJob = function(name, job) {
-    if (this.jobs[name]) {
-        job.lastRun = this.jobs[name].lastRun || job.lastRun;
-        this.removeJob(name);
-    }
-    this.addJob(name, job);
-};
+    SchedulePort.prototype.addJob = function(name, job) {
+        if (!this.jobs[name]) {
+            this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
+            this.jobs[name] = new cron.CronJob({
+                cronTime: job.pattern,
+                onTick: function() {
+                    this.jobs[name].lastRun = (new Date()).toISOString();
+                    job.lastRun = this.jobs[name].lastRun;
+                    this.stream.push([job, {opcode: name, mtid: 'notification'}]);
 
-UtCron.prototype.removeJob = function(name) {
-    this.log.info && this.log.info({opcode: 'Schedule', msg: `Remove Job ${name}`});
-    this.jobs[name].stop();
-    delete this.jobs[name];
-};
-
-UtCron.prototype.cleanupExpiredJobs = function(updateTime) {
-    Object.keys(this.jobs).map(function(key) {
-        if (this.jobs[key].updatedAt !== updateTime) {
-            this.removeJob(key);
+                    if (this._notify) {
+                        this._notify(job).catch(error => this.error(error));
+                    }
+                }.bind(this),
+                start: true,
+                timeZone: undefined,
+                context: undefined
+            });
+            this.jobs[name].updatedAt = job.updatedAt;
+            if (CheckForImmediateRun(job)) {
+                this.stream.push([job, {opcode: name, mtid: 'notification'}]);
+            }
+        } else {
+            this.log.info && this.log.info({opcode: 'Schedule', msg: `Cannot Add Job ${name}, allready exists, use updateJob`});
         }
-    }.bind(this));
-};
+    };
 
-module.exports = UtCron;
+    SchedulePort.prototype.updateJob = function(name, job) {
+        if (this.jobs[name]) {
+            job.lastRun = this.jobs[name].lastRun || job.lastRun;
+            this.removeJob(name);
+        }
+        this.addJob(name, job);
+    };
+
+    SchedulePort.prototype.removeJob = function(name) {
+        this.log.info && this.log.info({opcode: 'Schedule', msg: `Remove Job ${name}`});
+        this.jobs[name].stop();
+        delete this.jobs[name];
+    };
+
+    SchedulePort.prototype.cleanupExpiredJobs = function(updateTime) {
+        Object.keys(this.jobs).map(function(key) {
+            if (this.jobs[key].updatedAt !== updateTime) {
+                this.removeJob(key);
+            }
+        }.bind(this));
+    };
+
+    return SchedulePort;
+};

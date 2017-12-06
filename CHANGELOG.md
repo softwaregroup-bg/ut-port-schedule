@@ -1,3 +1,13 @@
+<a name="6.0.0"></a>
+# [6.0.0](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v5.5.7...v6.0.0) (2017-12-06)
+
+
+### Bug Fixes
+
+* remove bus dependency ([b62e607](https://github.com/softwaregroup-bg/ut-port-schedule/commit/b62e607))
+
+
+
 <a name="5.5.7"></a>
 ## [5.5.7](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v5.5.6...v5.5.7) (2017-05-22)
 

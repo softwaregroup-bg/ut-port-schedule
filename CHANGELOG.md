@@ -1,3 +1,13 @@
+<a name="6.0.1"></a>
+## [6.0.1](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v6.0.0...v6.0.1) (2018-10-25)
+
+
+### Bug Fixes
+
+* upgrade ut-tools ([da0bbb8](https://github.com/softwaregroup-bg/ut-port-schedule/commit/da0bbb8))
+
+
+
 <a name="6.0.0"></a>
 # [6.0.0](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v5.5.7...v6.0.0) (2017-12-06)
 

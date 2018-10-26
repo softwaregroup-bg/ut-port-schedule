@@ -134,7 +134,7 @@ module.exports = function({parent}) {
             }
             this.cleanupExpiredJobs(updateTime);
         }.bind(this))
-        .catch(function(e) {});
+            .catch(function(e) {});
     };
 
     SchedulePort.prototype.addJobs = function(jobs) {

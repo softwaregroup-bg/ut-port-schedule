@@ -1,6 +1,4 @@
 'use strict';
-const merge = require('lodash.merge');
-const util = require('util');
 const cron = require('cron');
 
 function CheckForImmediateRun(job) {
@@ -73,27 +71,21 @@ function CheckForImmediateRun(job) {
     return (currTime > nextTime);
 }
 
-module.exports = function({parent}) {
-    function SchedulePort({config}) {
-        parent && parent.apply(this, arguments);
-        this.config = merge({
-            id: null,
-            logLevel: 'info',
+module.exports = ({utPort}) => class SchedulePort extends utPort {
+    constructor() {
+        super(...arguments);
+        this.jobs = {};
+    }
+    get defaults() {
+        return {
             jobsList: {},
             type: 'schedule',
             listen: false
-        }, config);
+        };
     }
-
-    if (parent) {
-        util.inherits(SchedulePort, parent);
-    }
-
-    SchedulePort.prototype.jobs = {};
-
-    SchedulePort.prototype.start = function start() {
-        parent && parent.prototype.start.apply(this, arguments);
-        this.context = {requests: {}};
+    async start() {
+        const result = await super.start(...arguments);
+        this.context = { requests: {} };
         this.stream = this.pull(false, this.context);
 
         if (this.config.jobsList && (Object.keys(this.config.jobsList).length > 0)) {
@@ -118,9 +110,10 @@ module.exports = function({parent}) {
         if (this.config.run && this.config.run.notify) {
             this._notify = this.bus.importMethod(this.config.run.notify);
         }
-    };
+        return result;
+    }
 
-    SchedulePort.prototype.extLoad = function(jobs) {
+    extLoad(jobs) {
         this._load({}).then(function(r) {
             let updateTime = Date.now();
             if (r.jobsList) {
@@ -134,18 +127,18 @@ module.exports = function({parent}) {
             }
             this.cleanupExpiredJobs(updateTime);
         }.bind(this))
-            .catch(function(e) {});
-    };
+            .catch(function(e) { });
+    }
 
-    SchedulePort.prototype.addJobs = function(jobs) {
+    addJobs(jobs) {
         let keys = Object.keys(this.config.jobsList);
         for (let i = 0, l = keys.length; i < l; i++) {
             this.addJob(keys[i], jobs[keys[i]]);
         }
-        this.log.info && this.log.info({opcode: 'Schedule', msg: 'All jobs started'});
-    };
+        this.log.info && this.log.info({ opcode: 'Schedule', msg: 'All jobs started' });
+    }
 
-    SchedulePort.prototype.addJob = function(name, job) {
+    addJob(name, job) {
         if (!this.jobs[name]) {
             this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
             this.jobs[name] = new cron.CronJob({
@@ -170,29 +163,27 @@ module.exports = function({parent}) {
         } else {
             this.log.info && this.log.info({opcode: 'Schedule', msg: `Cannot Add Job ${name}, allready exists, use updateJob`});
         }
-    };
+    }
 
-    SchedulePort.prototype.updateJob = function(name, job) {
+    updateJob(name, job) {
         if (this.jobs[name]) {
             job.lastRun = this.jobs[name].lastRun || job.lastRun;
             this.removeJob(name);
         }
         this.addJob(name, job);
-    };
+    }
 
-    SchedulePort.prototype.removeJob = function(name) {
+    removeJob(name) {
         this.log.info && this.log.info({opcode: 'Schedule', msg: `Remove Job ${name}`});
         this.jobs[name].stop();
         delete this.jobs[name];
-    };
+    }
 
-    SchedulePort.prototype.cleanupExpiredJobs = function(updateTime) {
+    cleanupExpiredJobs(updateTime) {
         Object.keys(this.jobs).map(function(key) {
             if (this.jobs[key].updatedAt !== updateTime) {
                 this.removeJob(key);
             }
         }.bind(this));
-    };
-
-    return SchedulePort;
+    }
 };

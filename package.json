@@ -1,6 +1,6 @@
 {
   "name": "ut-port-schedule",
-  "version": "6.1.0-rc-godfather.1",
+  "version": "6.1.0-rc-godfather.2",
   "dependencies": {
     "cron": "1.3.0",
     "lodash.assign": "4.2.0"

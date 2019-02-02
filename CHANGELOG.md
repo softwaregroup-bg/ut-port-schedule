@@ -1,3 +1,21 @@
+# [7.0.0](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v6.0.1...v7.0.0) (2019-02-02)
+
+
+### Bug Fixes
+
+* ignore package-lock.json ([0f56e76](https://github.com/softwaregroup-bg/ut-port-schedule/commit/0f56e76))
+* lint ([0a16db9](https://github.com/softwaregroup-bg/ut-port-schedule/commit/0a16db9))
+* refactor as class ([#3](https://github.com/softwaregroup-bg/ut-port-schedule/issues/3)) ([2ac4fe5](https://github.com/softwaregroup-bg/ut-port-schedule/commit/2ac4fe5))
+* remove dependency to lodash.assign and add .gitignore ([8797703](https://github.com/softwaregroup-bg/ut-port-schedule/commit/8797703))
+* upgrade dependencies ([54df3b6](https://github.com/softwaregroup-bg/ut-port-schedule/commit/54df3b6))
+
+
+### BREAKING CHANGES
+
+* requires upgrade of ut-port and ut-run
+
+
+
 <a name="6.0.1"></a>
 ## [6.0.1](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v6.0.0...v6.0.1) (2018-10-25)
 

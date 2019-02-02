@@ -6,7 +6,7 @@
     "lodash.assign": "4.2.0"
   },
   "devDependencies": {
-    "ut-tools": "^6.6.2"
+    "ut-tools": "^6.8.10"
   },
   "description": "UT port schedule module.",
   "scripts": {

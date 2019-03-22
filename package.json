@@ -6,6 +6,7 @@
     "lodash.assign": "4.2.0"
   },
   "devDependencies": {
+    "tap": "^12.6.0",
     "ut-tools": "^6.8.10"
   },
   "description": "UT port schedule module.",

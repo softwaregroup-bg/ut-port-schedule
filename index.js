@@ -146,7 +146,7 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
                 onTick: function() {
                     this.jobs[name].lastRun = (new Date()).toISOString();
                     job.lastRun = this.jobs[name].lastRun;
-                    this.stream.push([job, {opcode: name, mtid: 'notification'}]);
+                    this.stream.push([job, {method: name, opcode: name, mtid: 'notification'}]);
 
                     if (this._notify) {
                         this._notify(job).catch(error => this.error(error));
@@ -158,7 +158,7 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
             });
             this.jobs[name].updatedAt = job.updatedAt;
             if (CheckForImmediateRun(job)) {
-                this.stream.push([job, {opcode: name, mtid: 'notification'}]);
+                this.stream.push([job, {method: name, opcode: name, mtid: 'notification'}]);
             }
         } else {
             this.log.info && this.log.info({opcode: 'Schedule', msg: `Cannot Add Job ${name}, allready exists, use updateJob`});

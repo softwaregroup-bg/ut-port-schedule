@@ -151,6 +151,9 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
             this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
             this.jobs[name] = new cron.CronJob({
                 cronTime: job.pattern,
+                unrefTimeout: function() {
+                    this.stopCron(name);
+                }.bind(this),
                 onTick: function() {
                     this.jobs[name].lastRun = (new Date()).toISOString();
                     job.lastRun = this.jobs[name].lastRun;

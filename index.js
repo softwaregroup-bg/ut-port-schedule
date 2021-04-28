@@ -1,9 +1,6 @@
 'use strict';
 const cron = require('cron');
 
-// Declare internal here so that so we can clear this
-let interval;
-
 function CheckForImmediateRun(job) {
     if (!job.lastRun || !(job.lastRun instanceof Date)) {
         return false;
@@ -110,7 +107,7 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
             }
             extLoadInterval = extLoadInterval * 1000;
 
-            interval = setInterval(this.extLoad.bind(this), extLoadInterval);
+            this.interval = setInterval(this.extLoad.bind(this), extLoadInterval);
         }
         if (this.config.run && this.config.run.notify) {
             this._notify = this.bus.importMethod(this.config.run.notify);
@@ -207,7 +204,7 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
         this.log.info && this.log.info({opcode: 'Schedule', msg: `Stop Job ${name}`});
         this.jobs[name].stop();
         if (this.config.extLoad && this.config.extLoad.from && this.config.extLoad.every) {
-            clearInterval(interval);
+            clearInterval(this.interval);
         }
     }
 };

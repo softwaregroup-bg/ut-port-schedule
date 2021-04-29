@@ -143,9 +143,6 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
 
     addJob(name, job) {
         if (!this.jobs[name]) {
-            if (this.jobs[name]) {
-                this.stop();
-            }
             this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
 
             this.jobs[name] = new cron.CronJob({
@@ -161,10 +158,7 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
                 }.bind(this),
                 start: true,
                 timeZone: undefined,
-                context: undefined,
-                onComplete: function() {
-                    this.stop(name);
-                }.bind(this)
+                context: undefined
             });
             this.jobs[name].updatedAt = job.updatedAt;
             if (CheckForImmediateRun(job)) {

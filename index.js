@@ -158,7 +158,8 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
                 }.bind(this),
                 start: true,
                 timeZone: undefined,
-                context: undefined
+                context: undefined,
+                unrefTimeout: true
             });
             this.jobs[name].updatedAt = job.updatedAt;
             if (CheckForImmediateRun(job)) {

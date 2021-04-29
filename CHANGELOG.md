@@ -1,3 +1,12 @@
+# [7.1.0](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v7.0.3...v7.1.0) (2021-04-29)
+
+
+### Features
+
+* upgrade cron, unref timers ([99f7e8c](https://github.com/softwaregroup-bg/ut-port-schedule/commit/99f7e8c8a68e5d4a644c926726631e8a7e0c9e32))
+
+
+
 ## [7.0.3](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v7.0.2...v7.0.3) (2020-01-17)
 
 

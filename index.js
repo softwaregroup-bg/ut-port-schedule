@@ -107,6 +107,7 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
             }
             extLoadInterval = extLoadInterval * 1000;
 
+            if (this.interval) clearInterval(this.interval);
             this.interval = setInterval(this.extLoad.bind(this), extLoadInterval);
         }
         if (this.config.run && this.config.run.notify) {
@@ -143,14 +144,12 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
     addJob(name, job) {
         if (!this.jobs[name]) {
             if (this.jobs[name]) {
-                this.stopCron(name);
+                this.stop();
             }
             this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
+
             this.jobs[name] = new cron.CronJob({
                 cronTime: job.pattern,
-                unrefTimeout: function() {
-                    this.stopCron(name);
-                }.bind(this),
                 onTick: function() {
                     this.jobs[name].lastRun = (new Date()).toISOString();
                     job.lastRun = this.jobs[name].lastRun;
@@ -162,7 +161,10 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
                 }.bind(this),
                 start: true,
                 timeZone: undefined,
-                context: undefined
+                context: undefined,
+                onComplete: function() {
+                    this.stop(name);
+                }.bind(this)
             });
             this.jobs[name].updatedAt = job.updatedAt;
             if (CheckForImmediateRun(job)) {
@@ -185,7 +187,7 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
         this.log.info && this.log.info({opcode: 'Schedule', msg: `Remove Job ${name}`});
         this.jobs[name].stop();
         delete this.jobs[name];
-        this.stopCron(name);
+        this.stop();
     }
 
     cleanupExpiredJobs(updateTime) {
@@ -200,11 +202,11 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
      * created stop function for cron and clear intervals
      * @param {name} name Job name
      */
-    stopCron(name) {
-        this.log.info && this.log.info({opcode: 'Schedule', msg: `Stop Job ${name}`});
-        this.jobs[name].stop();
-        if (this.config.extLoad && this.config.extLoad.from && this.config.extLoad.every) {
+    stop() {
+        if (this.interval) {
             clearInterval(this.interval);
+            delete this.interval;
         }
+        return super.stop(...arguments);
     }
 };

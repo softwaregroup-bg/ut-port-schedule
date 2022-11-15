@@ -9,8 +9,8 @@ function CheckForImmediateRun(job) {
     const lastRunHour = job.lastRun.getHours();
     const lastRunDay = job.lastRun.getDate();
     const lastRunMonth = (job.lastRun.getMonth()).toString();
-    const nlastRunYear = job.lastRun.getFullYear();
-    const lastRunYear = nlastRunYear.toString();
+    const nLastRunYear = job.lastRun.getFullYear();
+    const lastRunYear = nLastRunYear.toString();
     const lastRunYearMonth = parseInt(lastRunYear + (lastRunMonth.length === 1 ? ('0' + lastRunMonth) : lastRunMonth), 10);
     const cronTime = job.cronTime;
     const cMinute = cronTime.minute;
@@ -54,7 +54,7 @@ function CheckForImmediateRun(job) {
         eMinute = n;
     }
 
-    const nextDateTime = new Date(nlastRunYear, eMonth, eDay, eHour, eMinute, 0, 0);
+    const nextDateTime = new Date(nLastRunYear, eMonth, eDay, eHour, eMinute, 0, 0);
 
     for (let w = 0; w <= 6; w++) {
         const nextWDay = nextDateTime.getDay();
@@ -143,7 +143,7 @@ module.exports = ({utMeta, utPort, utMethod}) => class SchedulePort extends utPo
 
     addJob(name, job) {
         if (!this.jobs[name]) {
-            this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
+            this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job});
 
             this.jobs[name] = new cron.CronJob({
                 cronTime: job.pattern,

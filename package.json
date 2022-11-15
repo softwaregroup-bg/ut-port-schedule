@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "tap": "^12.6.0",
-    "ut-tools": "^6.30.5"
+    "ut-tools": "^6.41.5"
   },
   "description": "UT port schedule module.",
   "scripts": {

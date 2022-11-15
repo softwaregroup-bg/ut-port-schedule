@@ -9,8 +9,8 @@ function CheckForImmediateRun(job) {
     const lastRunHour = job.lastRun.getHours();
     const lastRunDay = job.lastRun.getDate();
     const lastRunMonth = (job.lastRun.getMonth()).toString();
-    const nlastRunYear = job.lastRun.getFullYear();
-    const lastRunYear = nlastRunYear.toString();
+    const nLastRunYear = job.lastRun.getFullYear();
+    const lastRunYear = nLastRunYear.toString();
     const lastRunYearMonth = parseInt(lastRunYear + (lastRunMonth.length === 1 ? ('0' + lastRunMonth) : lastRunMonth), 10);
     const cronTime = job.cronTime;
     const cMinute = cronTime.minute;
@@ -54,7 +54,7 @@ function CheckForImmediateRun(job) {
         eMinute = n;
     }
 
-    const nextDateTime = new Date(nlastRunYear, eMonth, eDay, eHour, eMinute, 0, 0);
+    const nextDateTime = new Date(nLastRunYear, eMonth, eDay, eHour, eMinute, 0, 0);
 
     for (let w = 0; w <= 6; w++) {
         const nextWDay = nextDateTime.getDay();
@@ -71,7 +71,7 @@ function CheckForImmediateRun(job) {
     return (currTime > nextTime);
 }
 
-module.exports = ({utPort}) => class SchedulePort extends utPort {
+module.exports = ({utMeta, utPort, utMethod}) => class SchedulePort extends utPort {
     constructor() {
         super(...arguments);
         this.jobs = {};
@@ -95,7 +95,7 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
         }
 
         if (this.config.extLoad && this.config.extLoad.from && this.config.extLoad.every) {
-            this._load = this.bus.importMethod(this.config.extLoad.from);
+            this._load = utMethod(this.config.extLoad.from);
             let extLoadInterval = parseInt(this.config.extLoad.every.slice(0, -1), 10);
             switch (this.config.extLoad.every.slice(-1)) {
                 case 'h':
@@ -111,13 +111,13 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
             this.interval = setInterval(this.extLoad.bind(this), extLoadInterval);
         }
         if (this.config.run && this.config.run.notify) {
-            this._notify = this.bus.importMethod(this.config.run.notify);
+            this._notify = utMethod(this.config.run.notify);
         }
         return result;
     }
 
     extLoad(jobs) {
-        this._load({}).then(function(r) {
+        this._load({}, utMeta()).then(function(r) {
             const updateTime = Date.now();
             if (r.jobsList) {
                 r = r.jobsList;
@@ -143,17 +143,17 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
 
     addJob(name, job) {
         if (!this.jobs[name]) {
-            this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
+            this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job});
 
             this.jobs[name] = new cron.CronJob({
                 cronTime: job.pattern,
                 onTick: function() {
                     this.jobs[name].lastRun = (new Date()).toISOString();
                     job.lastRun = this.jobs[name].lastRun;
-                    this.stream.push([job, {method: name, opcode: name, mtid: 'notification'}]);
+                    this.stream.push([job, utMeta({method: name, opcode: name, mtid: 'notification'})]);
 
                     if (this._notify) {
-                        this._notify(job).catch(error => this.error(error));
+                        this._notify(job, utMeta()).catch(error => this.error(error));
                     }
                 }.bind(this),
                 start: true,

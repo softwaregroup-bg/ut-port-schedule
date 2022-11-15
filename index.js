@@ -71,7 +71,7 @@ function CheckForImmediateRun(job) {
     return (currTime > nextTime);
 }
 
-module.exports = ({utPort}) => class SchedulePort extends utPort {
+module.exports = ({utMeta, utPort, utMethod}) => class SchedulePort extends utPort {
     constructor() {
         super(...arguments);
         this.jobs = {};
@@ -95,7 +95,7 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
         }
 
         if (this.config.extLoad && this.config.extLoad.from && this.config.extLoad.every) {
-            this._load = this.bus.importMethod(this.config.extLoad.from);
+            this._load = utMethod(this.config.extLoad.from);
             let extLoadInterval = parseInt(this.config.extLoad.every.slice(0, -1), 10);
             switch (this.config.extLoad.every.slice(-1)) {
                 case 'h':
@@ -111,13 +111,13 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
             this.interval = setInterval(this.extLoad.bind(this), extLoadInterval);
         }
         if (this.config.run && this.config.run.notify) {
-            this._notify = this.bus.importMethod(this.config.run.notify);
+            this._notify = utMethod(this.config.run.notify);
         }
         return result;
     }
 
     extLoad(jobs) {
-        this._load({}).then(function(r) {
+        this._load({}, utMeta()).then(function(r) {
             const updateTime = Date.now();
             if (r.jobsList) {
                 r = r.jobsList;
@@ -153,7 +153,7 @@ module.exports = ({utPort}) => class SchedulePort extends utPort {
                     this.stream.push([job, {method: name, opcode: name, mtid: 'notification'}]);
 
                     if (this._notify) {
-                        this._notify(job).catch(error => this.error(error));
+                        this._notify(job, utMeta()).catch(error => this.error(error));
                     }
                 }.bind(this),
                 start: true,

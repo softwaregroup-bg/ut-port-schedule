@@ -1,3 +1,12 @@
+## [7.1.1](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v7.1.0...v7.1.1) (2022-11-15)
+
+
+### Bug Fixes
+
+* pass meta ([#7](https://github.com/softwaregroup-bg/ut-port-schedule/issues/7)) ([d159be5](https://github.com/softwaregroup-bg/ut-port-schedule/commit/d159be52de9f703c83f40715b52b0f98b22c4d81))
+
+
+
 # [7.1.0](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v7.0.3...v7.1.0) (2021-04-29)
 
 

@@ -150,7 +150,7 @@ module.exports = ({utMeta, utPort, utMethod}) => class SchedulePort extends utPo
                 onTick: function() {
                     this.jobs[name].lastRun = (new Date()).toISOString();
                     job.lastRun = this.jobs[name].lastRun;
-                    this.stream.push([job, {method: name, opcode: name, mtid: 'notification'}]);
+                    this.stream.push([job, utMeta({method: name, opcode: name, mtid: 'notification'})]);
 
                     if (this._notify) {
                         this._notify(job, utMeta()).catch(error => this.error(error));

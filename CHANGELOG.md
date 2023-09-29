@@ -1,3 +1,7 @@
+## [7.1.2](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v7.1.1...v7.1.2) (2023-09-29)
+
+
+
 ## [7.1.1](https://github.com/softwaregroup-bg/ut-port-schedule/compare/v7.1.0...v7.1.1) (2022-11-15)
 
 

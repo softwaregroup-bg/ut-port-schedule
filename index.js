@@ -81,7 +81,8 @@ module.exports = ({utMeta, utPort, utMethod}) => class SchedulePort extends utPo
         return {
             jobsList: {},
             type: 'schedule',
-            listen: false
+            listen: false,
+            disconnectOnError: false
         };
     }
 

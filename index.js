@@ -148,9 +148,24 @@ module.exports = function({parent}) {
     SchedulePort.prototype.addJob = function(name, job) {
         if (!this.jobs[name]) {
             this.log.info && this.log.info({opcode: 'Schedule', msg: `Add Job ${name}`, job: job});
-            this.jobs[name] = new cron.CronJob({
-                cronTime: job.pattern,
-                onTick: function() {
+            // this.jobs[name] = new cron.CronJob({
+            //     cronTime: job.pattern,
+            //     onTick: function() {
+            //         this.jobs[name].lastRun = (new Date()).toISOString();
+            //         job.lastRun = this.jobs[name].lastRun;
+            //         this.stream.push([job, {opcode: name, mtid: 'notification'}]);
+
+            //         if (this._notify) {
+            //             this._notify(job).catch(error => this.error(error));
+            //         }
+            //     }.bind(this),
+            //     start: true,
+            //     timeZone: undefined,
+            //     context: undefined
+            // });
+            this.jobs[name] = new cron.CronJob(
+                job.pattern,
+                function() {
                     this.jobs[name].lastRun = (new Date()).toISOString();
                     job.lastRun = this.jobs[name].lastRun;
                     this.stream.push([job, {opcode: name, mtid: 'notification'}]);
@@ -159,10 +174,10 @@ module.exports = function({parent}) {
                         this._notify(job).catch(error => this.error(error));
                     }
                 }.bind(this),
-                start: true,
-                timeZone: undefined,
-                context: undefined
-            });
+                true,
+                null,
+                null
+            );
             this.jobs[name].updatedAt = job.updatedAt;
             if (CheckForImmediateRun(job)) {
                 this.stream.push([job, {opcode: name, mtid: 'notification'}]);

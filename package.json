@@ -1,6 +1,6 @@
 {
   "name": "ut-port-schedule",
-  "version": "7.1.2",
+  "version": "7.1.3",
   "dependencies": {
     "cron": "1.8.2",
     "lodash.assign": "4.2.0"
